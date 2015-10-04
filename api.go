@@ -3,6 +3,7 @@ package main
 import (
 	"errors"
 	"fmt"
+	"log"
 	"net"
 	"net/http"
 	"net/http/cookiejar"
@@ -55,7 +56,9 @@ func (c *Client) Login(user, pass string) error {
 		return err
 	}
 	resp.Body.Close()
-	if resp.StatusCode != http.StatusOK {
+	if resp.StatusCode == http.StatusOK {
+		log.Println("login as", user)
+	} else {
 		return errors.New("login.jsp " + resp.Status)
 	}
 	c.token = c.csrf()
@@ -74,7 +77,9 @@ func (c *Client) LoginProcess() error {
 		return err
 	}
 	resp.Body.Close()
-	if resp.StatusCode != http.StatusOK {
+	if resp.StatusCode == http.StatusOK {
+		log.Println("logged in")
+	} else {
 		return errors.New("login_process " + resp.Status)
 	}
 	return nil
@@ -88,7 +93,9 @@ func (c *Client) Logout() error {
 		return err
 	}
 	resp.Body.Close()
-	if resp.StatusCode != http.StatusOK {
+	if resp.StatusCode == http.StatusOK {
+		log.Println("logout", c.user)
+	} else {
 		return errors.New("logout " + resp.Status)
 	}
 	return nil
@@ -107,6 +114,9 @@ func BanParams(reason string, ban Ban, days int, posting, captcha bool) url.Valu
 }
 
 func (c *Client) BanIP(ip net.IP, v url.Values) error {
+	if ip == nil {
+		return errors.New("empty IP")
+	}
 	v.Set("csrf", c.token)
 	v.Set("ip", fmt.Sprint(ip))
 	resp, err := c.PostForm(c.banip, v)
@@ -114,7 +124,9 @@ func (c *Client) BanIP(ip net.IP, v url.Values) error {
 		return err
 	}
 	resp.Body.Close()
-	if resp.StatusCode != http.StatusOK {
+	if resp.StatusCode == http.StatusOK {
+		log.Println("ban", ip)
+	} else {
 		return errors.New("banip.jsp " + resp.Status)
 	}
 	return nil

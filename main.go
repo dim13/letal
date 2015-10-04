@@ -5,17 +5,20 @@ package main
 import (
 	"flag"
 	"log"
+	"sync"
 )
 
 const defReason = "Anonymous TOR Coward"
 
 var user, pass, reason, file string
+var concurrancy int
 
 func init() {
 	flag.StringVar(&user, "user", "", "Username")
 	flag.StringVar(&pass, "pass", "", "Password")
 	flag.StringVar(&reason, "reason", defReason, "Ban reason")
 	flag.StringVar(&file, "file", "torlist", "IP list file")
+	flag.IntVar(&concurrancy, "concurrancy", 10, "Concurrancy")
 }
 
 func main() {
@@ -28,7 +31,7 @@ func main() {
 		return
 	}
 
-	list, err := NewList(file)
+	list, err := List(file)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -38,11 +41,19 @@ func main() {
 	defer c.Logout()
 
 	v := BanParams(reason, ban, days, true, false)
-	for n, ip := range list {
-		log.Println(n+1, "of", len(list), "ban", ip)
-		err = c.BanIP(ip, v)
-		if err != nil {
-			log.Fatal("line", n+1, err)
-		}
+	wg := sync.WaitGroup{}
+	for i := 0; i < concurrancy; i++ {
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			for ip := range list {
+				err := c.BanIP(ip, v)
+				if err != nil {
+					log.Println(ip, err)
+					return
+				}
+			}
+		}()
 	}
+	wg.Wait()
 }
