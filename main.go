@@ -39,10 +39,10 @@ func main() {
 
 	v := BanParams(reason, ban, days, true, false)
 	for n, ip := range list {
-		log.Println(n, "of", len(list), "ban", ip)
+		log.Println(n+1, "of", len(list), "ban", ip)
 		err = c.BanIP(ip, v)
 		if err != nil {
-			log.Fatal("line", n, err)
+			log.Fatal("line", n+1, err)
 		}
 	}
 }
