@@ -50,6 +50,7 @@ func main() {
 				err := c.BanIP(ip, v)
 				if err != nil {
 					log.Println(ip, err)
+					list <- ip // push back
 					return
 				}
 			}
