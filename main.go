@@ -18,7 +18,7 @@ func init() {
 	flag.StringVar(&pass, "pass", "", "Password")
 	flag.StringVar(&reason, "reason", defReason, "Ban reason")
 	flag.StringVar(&file, "file", "torlist", "IP list file")
-	flag.IntVar(&worker, "worker", 10, "Concurrancy")
+	flag.IntVar(&worker, "worker", 3, "Concurrancy")
 }
 
 func main() {
