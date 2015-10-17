@@ -10,15 +10,20 @@ import (
 
 const defReason = "Anonymous TOR Coward"
 
-var user, pass, reason, file string
-var worker int
+var (
+	user, pass, reason, file string
+	worker, days             int
+	ban                      = Month
+)
 
 func init() {
 	flag.StringVar(&user, "user", "", "Username")
 	flag.StringVar(&pass, "pass", "", "Password")
 	flag.StringVar(&reason, "reason", defReason, "Ban reason")
 	flag.StringVar(&file, "file", "torlist", "IP list file")
-	flag.IntVar(&worker, "worker", 3, "Concurrancy")
+	flag.IntVar(&worker, "worker", 4, "Concurrency")
+	flag.IntVar(&days, "days", 0, "Custom ban duration in days")
+	flag.Var(&ban, "ban", banUsage())
 }
 
 func main() {

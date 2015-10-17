@@ -2,7 +2,6 @@ package main
 
 import (
 	"errors"
-	"flag"
 	"fmt"
 )
 
@@ -19,16 +18,6 @@ const (
 	Custom
 )
 
-var (
-	ban  = Month
-	days int
-)
-
-func init() {
-	flag.Var(&ban, "ban", banUsage())
-	flag.IntVar(&days, "days", 0, "Custom ban in days")
-}
-
 var banNames = map[Ban]string{
 	Hour:       "hour",
 	Day:        "day",
@@ -41,7 +30,7 @@ var banNames = map[Ban]string{
 }
 
 func banUsage() string {
-	s := "Ban:"
+	s := "Ban duration:"
 	for i := Hour; i < Custom; i++ {
 		s += fmt.Sprint(" ", i)
 	}
