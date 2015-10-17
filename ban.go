@@ -1,9 +1,6 @@
 package main
 
-import (
-	"errors"
-	"fmt"
-)
+import "fmt"
 
 type Ban int
 
@@ -44,7 +41,7 @@ func (b *Ban) Set(s string) error {
 			return nil
 		}
 	}
-	return errors.New("unknown ban value")
+	return fmt.Errorf("unknown ban value")
 }
 
 func (b Ban) String() string {
