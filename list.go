@@ -2,12 +2,13 @@ package main
 
 import (
 	"bufio"
+	"log"
 	"net"
 	"os"
 	"strings"
 )
 
-func List(fname string) (<-chan net.IP, error) {
+func List(fname string) (chan net.IP, error) {
 	c := make(chan net.IP)
 	file, err := os.Open(fname)
 	if err != nil {
@@ -24,6 +25,7 @@ func List(fname string) (<-chan net.IP, error) {
 			}
 			c <- net.ParseIP(line)
 		}
+		log.Println("list done")
 	}()
 	return c, nil
 }

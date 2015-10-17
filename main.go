@@ -11,14 +11,14 @@ import (
 const defReason = "Anonymous TOR Coward"
 
 var user, pass, reason, file string
-var concurrancy int
+var worker int
 
 func init() {
 	flag.StringVar(&user, "user", "", "Username")
 	flag.StringVar(&pass, "pass", "", "Password")
 	flag.StringVar(&reason, "reason", defReason, "Ban reason")
 	flag.StringVar(&file, "file", "torlist", "IP list file")
-	flag.IntVar(&concurrancy, "concurrancy", 10, "Concurrancy")
+	flag.IntVar(&worker, "worker", 3, "Concurrancy")
 }
 
 func main() {
@@ -42,16 +42,21 @@ func main() {
 
 	v := BanParams(reason, ban, days, true, false)
 	wg := sync.WaitGroup{}
-	for i := 0; i < concurrancy; i++ {
+	for i := 0; i < worker; i++ {
 		wg.Add(1)
 		go func() {
 			defer wg.Done()
 			for ip := range list {
 				if err := c.BanIP(ip, v); err != nil {
 					log.Println(ip, err)
+					list <- ip // push back
 				}
 			}
 		}()
 	}
 	wg.Wait()
+
+	if _, ok := <-list; ok {
+		log.Fatal("run out of worker")
+	}
 }

@@ -3,7 +3,7 @@ Less TOR at LOR
 
 ## Usage
 ```
-go generate
 go build
+go generate # fetch fresh list
 ./letal -user maxcom -pass secret
 ```
