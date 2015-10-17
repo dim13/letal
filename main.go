@@ -47,10 +47,8 @@ func main() {
 		go func() {
 			defer wg.Done()
 			for ip := range list {
-				err := c.BanIP(ip, v)
-				if err != nil {
+				if err := c.BanIP(ip, v); err != nil {
 					log.Println(ip, err)
-					return
 				}
 			}
 		}()
