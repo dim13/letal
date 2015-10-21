@@ -6,6 +6,7 @@ import (
 	"net"
 	"os"
 	"strings"
+	"time"
 )
 
 func List(fname string) (chan net.IP, error) {
@@ -26,6 +27,7 @@ func List(fname string) (chan net.IP, error) {
 			c <- net.ParseIP(line)
 		}
 		log.Println("list done")
+		time.Sleep(time.Second)
 	}()
 	return c, nil
 }
