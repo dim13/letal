@@ -9,11 +9,11 @@ import (
 )
 
 func List(fname string) (chan net.IP, error) {
-	c := make(chan net.IP)
 	file, err := os.Open(fname)
 	if err != nil {
 		return nil, err
 	}
+	c := make(chan net.IP)
 	go func() {
 		scanner := bufio.NewScanner(file)
 		defer file.Close()
