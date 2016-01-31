@@ -1,26 +1,27 @@
 package main
 
-//go:generate curl -o torlist "https://check.torproject.org/cgi-bin/TorBulkExitList.py?ip=178.248.233.6&port=443"
-
 import (
 	"flag"
 	"log"
+	"net"
 	"sync"
 )
 
 const defReason = "Anonymous TOR Coward"
 
 var (
-	user, pass, reason, file string
-	worker, days             int
-	ban                      = Month
+	user, pass, reason, file, target string
+	worker, days, port               int
+	ban                              = Month
 )
 
 func init() {
 	flag.StringVar(&user, "user", "", "Username")
 	flag.StringVar(&pass, "pass", "", "Password")
 	flag.StringVar(&reason, "reason", defReason, "Ban reason")
-	flag.StringVar(&file, "file", "torlist", "IP list file")
+	flag.StringVar(&file, "file", "", "IP list file")
+	flag.StringVar(&target, "target", "linux.org.ru", "Target host")
+	flag.IntVar(&port, "port", 443, "Target port")
 	flag.IntVar(&worker, "worker", 4, "Concurrency")
 	flag.IntVar(&days, "days", 0, "Custom ban duration in days")
 	flag.Var(&ban, "ban", banUsage())
@@ -36,7 +37,15 @@ func main() {
 		return
 	}
 
-	list, err := List(file)
+	var (
+		list chan net.IP
+		err  error
+	)
+	if file != "" {
+		list, err = List(file)
+	} else {
+		list, err = Fetch(target, port)
+	}
 	if err != nil {
 		log.Fatal(err)
 	}
