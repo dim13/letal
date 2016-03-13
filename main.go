@@ -51,7 +51,9 @@ func main() {
 	}
 
 	c := NewClient()
-	c.Login(user, pass)
+	if err := c.Login(user, pass); err != nil {
+		log.Fatal(err)
+	}
 	defer c.Logout()
 
 	v := BanParams(reason, ban, days, true, false)
@@ -64,6 +66,7 @@ func main() {
 				if err := c.BanIP(ip, v); err != nil {
 					log.Println(ip, err)
 					list <- ip // push back
+					return
 				}
 			}
 		}()
