@@ -9,6 +9,7 @@ import (
 	"net/http/cookiejar"
 	"net/url"
 	"strings"
+	"time"
 )
 
 const baseURL = "https://www.linux.org.ru/"
@@ -41,7 +42,7 @@ func NewClient() *Client {
 	u, _ := url.Parse(baseURL)
 	j, _ := cookiejar.New(nil)
 	return &Client{
-		Client:       &http.Client{Jar: j},
+		Client:       &http.Client{Jar: j, Timeout: time.Second * 15},
 		URL:          u,
 		login:        fmt.Sprint(u, "login.jsp"),
 		loginProcess: fmt.Sprint(u, "login_process"),
