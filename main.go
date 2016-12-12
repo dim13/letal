@@ -56,13 +56,13 @@ func main() {
 	}
 	defer c.Logout()
 
-	v := BanParams(reason, ban, days, true, false)
 	wg := sync.WaitGroup{}
 	for i := 0; i < worker; i++ {
 		wg.Add(1)
 		go func() {
 			defer wg.Done()
 			for ip := range list {
+				v := BanParams(reason, ban, days, true, false)
 				if err := c.BanIP(ip, v); err != nil {
 					log.Println(ip, err)
 					list <- ip // push back
