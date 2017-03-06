@@ -22,7 +22,7 @@ func init() {
 	flag.StringVar(&file, "file", "", "IP list file")
 	flag.StringVar(&target, "target", "linux.org.ru", "Target host")
 	flag.IntVar(&port, "port", 443, "Target port")
-	flag.IntVar(&worker, "worker", 4, "Concurrency")
+	flag.IntVar(&worker, "worker", 2, "Concurrency")
 	flag.IntVar(&days, "days", 0, "Custom ban duration in days")
 	flag.Var(&ban, "ban", banUsage())
 }
