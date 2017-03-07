@@ -1,9 +1,7 @@
 package main
 
 import (
-	"errors"
 	"fmt"
-	"log"
 	"net"
 	"net/http"
 	"net/http/cookiejar"
@@ -51,16 +49,21 @@ func NewClient() *Client {
 	}
 }
 
+func check(resp *http.Response) error {
+	if resp.StatusCode != http.StatusOK {
+		return fmt.Errorf("%v: %v", resp.Request.URL, resp.Status)
+	}
+	return nil
+}
+
 func (c *Client) Login(user, pass string) error {
 	resp, err := c.Get(c.login)
 	if err != nil {
 		return err
 	}
 	resp.Body.Close()
-	if resp.StatusCode == http.StatusOK {
-		log.Println("login as", user)
-	} else {
-		return errors.New("login.jsp " + resp.Status)
+	if err := check(resp); err != nil {
+		return err
 	}
 	c.token = c.csrf()
 	c.user = user
@@ -78,12 +81,7 @@ func (c *Client) LoginProcess() error {
 		return err
 	}
 	resp.Body.Close()
-	if resp.StatusCode == http.StatusOK {
-		log.Println("logged in")
-	} else {
-		return errors.New("login_process " + resp.Status)
-	}
-	return nil
+	return check(resp)
 }
 
 func (c *Client) Logout() error {
@@ -94,12 +92,7 @@ func (c *Client) Logout() error {
 		return err
 	}
 	resp.Body.Close()
-	if resp.StatusCode == http.StatusOK {
-		log.Println("logout", c.user)
-	} else {
-		return errors.New("logout " + resp.Status)
-	}
-	return nil
+	return check(resp)
 }
 
 func BanParams(reason string, ban Ban, days int, posting, captcha bool) url.Values {
@@ -116,7 +109,7 @@ func BanParams(reason string, ban Ban, days int, posting, captcha bool) url.Valu
 
 func (c *Client) BanIP(ip net.IP, v url.Values) error {
 	if ip == nil {
-		return errors.New("empty IP")
+		return fmt.Errorf("empty IP")
 	}
 	v.Set("csrf", c.token)
 	v.Set("ip", fmt.Sprint(ip))
@@ -125,10 +118,5 @@ func (c *Client) BanIP(ip net.IP, v url.Values) error {
 		return err
 	}
 	resp.Body.Close()
-	if resp.StatusCode == http.StatusOK {
-		log.Println("ban", ip)
-	} else {
-		return errors.New("banip.jsp " + resp.Status)
-	}
-	return nil
+	return check(resp)
 }
