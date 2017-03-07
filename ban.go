@@ -2,42 +2,33 @@ package main
 
 import "fmt"
 
-type Ban int
+type Ban string
 
 const (
-	Hour Ban = iota
-	Day
-	Month
-	ThreeMonth
-	SixMonth
-	Unlim
-	Remove
-	Custom
+	Hour       Ban = "hour"
+	Day        Ban = "day"
+	Month      Ban = "month"
+	ThreeMonth Ban = "3month"
+	SixMonth   Ban = "6month"
+	Unlim      Ban = "unlim"
+	Remove     Ban = "remove"
+	Custom     Ban = "custom"
 )
 
-var banNames = map[Ban]string{
-	Hour:       "hour",
-	Day:        "day",
-	Month:      "month",
-	ThreeMonth: "3month",
-	SixMonth:   "6month",
-	Unlim:      "unlim",
-	Remove:     "remove",
-	Custom:     "custom",
-}
+var validBans = []Ban{Hour, Day, ThreeMonth, SixMonth, Unlim, Remove, Custom}
 
-func banUsage() string {
+func (b Ban) Usage() string {
 	s := "Ban duration:"
-	for i := Hour; i < Custom; i++ {
-		s += fmt.Sprint(" ", i)
+	for _, v := range validBans {
+		s += fmt.Sprintf(" %v", v)
 	}
 	return s
 }
 
 func (b *Ban) Set(s string) error {
-	for k, v := range banNames {
-		if v == s {
-			*b = k
+	for _, v := range validBans {
+		if Ban(s) == v {
+			*b = v
 			return nil
 		}
 	}
@@ -45,5 +36,5 @@ func (b *Ban) Set(s string) error {
 }
 
 func (b Ban) String() string {
-	return banNames[b]
+	return string(b)
 }

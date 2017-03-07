@@ -24,7 +24,7 @@ func init() {
 	flag.IntVar(&port, "port", 443, "Target port")
 	flag.IntVar(&worker, "worker", 2, "Concurrency")
 	flag.IntVar(&days, "days", 0, "Custom ban duration in days")
-	flag.Var(&ban, "ban", banUsage())
+	flag.Var(&ban, "ban", ban.Usage())
 }
 
 func main() {
