@@ -63,6 +63,7 @@ func main() {
 			defer wg.Done()
 			for ip := range list {
 				v := BanParams(reason, ban, days, true, false)
+				log.Println(ip, ban)
 				if err := c.BanIP(ip, v); err != nil {
 					log.Println(ip, err)
 					list <- ip // push back
