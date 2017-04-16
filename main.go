@@ -4,6 +4,7 @@ import (
 	"flag"
 	"log"
 	"net"
+	"os"
 	"sync"
 )
 
@@ -16,8 +17,8 @@ var (
 )
 
 func init() {
-	flag.StringVar(&user, "user", "", "Username")
-	flag.StringVar(&pass, "pass", "", "Password")
+	flag.StringVar(&user, "user", os.Getenv("LORUSER"), "Username")
+	flag.StringVar(&pass, "pass", os.Getenv("LORPASS"), "Password")
 	flag.StringVar(&reason, "reason", defReason, "Ban reason")
 	flag.StringVar(&file, "file", "", "IP list file")
 	flag.StringVar(&target, "target", "linux.org.ru", "Target host")
