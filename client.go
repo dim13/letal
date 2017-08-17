@@ -10,7 +10,7 @@ import (
 	"time"
 )
 
-const baseURL = "https://www.linux.org.ru/"
+const lorURL = "https://www.linux.org.ru/"
 
 type Client struct {
 	*http.Client
@@ -37,7 +37,7 @@ func (c Client) csrf() string {
 }
 
 func NewClient() *Client {
-	u, _ := url.Parse(baseURL)
+	u, _ := url.Parse(lorURL)
 	j, _ := cookiejar.New(nil)
 	return &Client{
 		Client:       &http.Client{Jar: j, Timeout: time.Second * 15},

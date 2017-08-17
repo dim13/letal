@@ -11,14 +11,14 @@ import (
 	"strings"
 )
 
-const uri = `https://check.torproject.org/cgi-bin/TorBulkExitList.py?ip=%s&port=%d`
+const exitList = `https://check.torproject.org/cgi-bin/TorBulkExitList.py?ip=%s&port=%d`
 
 func Fetch(host string, port int) (chan net.IP, error) {
 	ip, err := net.LookupIP(host)
 	if err != nil {
 		return nil, err
 	}
-	query := fmt.Sprintf(uri, ip[0], port)
+	query := fmt.Sprintf(exitList, ip[0], port)
 	log.Printf("fetch list for %s:%d\n", ip[0], port)
 	resp, err := http.Get(query)
 	if err != nil {
