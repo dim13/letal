@@ -36,9 +36,15 @@ func (c Client) csrf() string {
 	return ""
 }
 
-func NewClient() *Client {
-	u, _ := url.Parse(lorURL)
-	j, _ := cookiejar.New(nil)
+func NewClient() (*Client, error) {
+	u, err := url.Parse(lorURL)
+	if err != nil {
+		return nil, err
+	}
+	j, err := cookiejar.New(nil)
+	if err != nil {
+		return nil, err
+	}
 	return &Client{
 		Client:       &http.Client{Jar: j, Timeout: time.Second * 15},
 		URL:          u,
@@ -46,7 +52,7 @@ func NewClient() *Client {
 		loginProcess: fmt.Sprint(u, "login_process"),
 		banip:        fmt.Sprint(u, "banip.jsp"),
 		logout:       fmt.Sprint(u, "logout"),
-	}
+	}, nil
 }
 
 func check(resp *http.Response) error {

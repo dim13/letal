@@ -10,13 +10,13 @@ import (
 
 const defReason = "Anonymous TOR Coward"
 
-var (
-	user, pass, reason, file, target string
-	worker, days, port               int
-	ban                              = Month
-)
+func main() {
+	var (
+		user, pass, reason, file, target string
+		worker, days, port               int
+		ban                              = Month
+	)
 
-func init() {
 	flag.StringVar(&user, "user", os.Getenv("LORUSER"), "Username")
 	flag.StringVar(&pass, "pass", os.Getenv("LORPASS"), "Password")
 	flag.StringVar(&reason, "reason", defReason, "Ban reason")
@@ -26,10 +26,9 @@ func init() {
 	flag.IntVar(&worker, "worker", 2, "Concurrency")
 	flag.IntVar(&days, "days", 0, "Custom ban duration in days")
 	flag.Var(&ban, "ban", ban.Usage())
-}
 
-func main() {
 	flag.Parse()
+
 	if days != 0 {
 		ban = Custom
 	}
@@ -51,7 +50,10 @@ func main() {
 		log.Fatal(err)
 	}
 
-	c := NewClient()
+	c, err := NewClient()
+	if err != nil {
+		log.Fatal(err)
+	}
 	if err := c.Login(user, pass); err != nil {
 		log.Fatal(err)
 	}
