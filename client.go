@@ -55,7 +55,7 @@ func NewClient() (*Client, error) {
 	}, nil
 }
 
-func check(resp *http.Response) error {
+func checkStatus(resp *http.Response) error {
 	if resp.StatusCode != http.StatusOK {
 		return fmt.Errorf("%v: %v", resp.Request.URL, resp.Status)
 	}
@@ -68,7 +68,7 @@ func (c *Client) Login(user, pass string) error {
 		return err
 	}
 	resp.Body.Close()
-	if err := check(resp); err != nil {
+	if err := checkStatus(resp); err != nil {
 		return err
 	}
 	c.token = c.csrf()
@@ -87,7 +87,7 @@ func (c *Client) LoginProcess() error {
 		return err
 	}
 	resp.Body.Close()
-	return check(resp)
+	return checkStatus(resp)
 }
 
 func (c *Client) Logout() error {
@@ -98,7 +98,7 @@ func (c *Client) Logout() error {
 		return err
 	}
 	resp.Body.Close()
-	return check(resp)
+	return checkStatus(resp)
 }
 
 func BanParams(reason string, ban Ban, days int, posting, captcha bool) url.Values {
@@ -124,5 +124,5 @@ func (c *Client) BanIP(ip net.IP, v url.Values) error {
 		return err
 	}
 	resp.Body.Close()
-	return check(resp)
+	return checkStatus(resp)
 }

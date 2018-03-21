@@ -24,7 +24,7 @@ func Fetch(host string, port int) (chan net.IP, error) {
 	if err != nil {
 		return nil, err
 	}
-	if err := check(resp); err != nil {
+	if err := checkStatus(resp); err != nil {
 		return nil, err
 	}
 	return list(resp.Body)
