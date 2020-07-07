@@ -2,25 +2,33 @@ package main
 
 import (
 	"bufio"
-	"fmt"
 	"io"
 	"log"
 	"net"
 	"net/http"
+	"net/url"
 	"os"
 	"strings"
 )
 
-const exitList = `https://check.torproject.org/cgi-bin/TorBulkExitList.py?ip=%s&port=%d`
+const ExitList = `https://check.torproject.org/torbulkexitlist`
 
-func Fetch(host string, port int) (chan net.IP, error) {
-	ip, err := net.LookupIP(host)
+func Fetch(from, target string) (chan net.IP, error) {
+	t, err := url.Parse(target)
 	if err != nil {
 		return nil, err
 	}
-	query := fmt.Sprintf(exitList, ip[0], port)
-	log.Printf("fetch list for %s:%d\n", ip[0], port)
-	resp, err := http.Get(query)
+	ip, err := net.LookupIP(t.Hostname())
+	if err != nil {
+		return nil, err
+	}
+	q, err := url.Parse(from)
+	if err != nil {
+		return nil, err
+	}
+	q.Query().Add("ip", ip[0].String())
+	q.Query().Add("port", t.Port())
+	resp, err := http.Get(q.String())
 	if err != nil {
 		return nil, err
 	}

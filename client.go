@@ -10,22 +10,13 @@ import (
 	"time"
 )
 
-const lorURL = "https://www.linux.org.ru/"
-
 type Client struct {
 	*http.Client
-	*url.URL
-	login        string
-	loginProcess string
-	banip        string
-	logout       string
-	token        string
-	user         string
-	pass         string
+	base *url.URL
 }
 
 func (c Client) csrf() string {
-	for _, cookie := range c.Jar.Cookies(c.URL) {
+	for _, cookie := range c.Jar.Cookies(c.base) {
 		if cookie.Name == "CSRF_TOKEN" {
 			if i := strings.Index(cookie.Value, "="); i > 0 {
 				return cookie.Value[:i]
@@ -36,8 +27,12 @@ func (c Client) csrf() string {
 	return ""
 }
 
-func NewClient() (*Client, error) {
-	u, err := url.Parse(lorURL)
+func (c Client) path(p string) string {
+	return c.base.ResolveReference(&url.URL{Path: p}).String()
+}
+
+func NewClient(uri string) (*Client, error) {
+	u, err := url.Parse(uri)
 	if err != nil {
 		return nil, err
 	}
@@ -46,12 +41,8 @@ func NewClient() (*Client, error) {
 		return nil, err
 	}
 	return &Client{
-		Client:       &http.Client{Jar: j, Timeout: time.Second * 15},
-		URL:          u,
-		login:        fmt.Sprint(u, "login.jsp"),
-		loginProcess: fmt.Sprint(u, "login_process"),
-		banip:        fmt.Sprint(u, "banip.jsp"),
-		logout:       fmt.Sprint(u, "logout"),
+		Client: &http.Client{Jar: j, Timeout: time.Second * 15},
+		base:   u,
 	}, nil
 }
 
@@ -63,7 +54,7 @@ func checkStatus(resp *http.Response) error {
 }
 
 func (c *Client) Login(user, pass string) error {
-	resp, err := c.Get(c.login)
+	resp, err := c.Get(c.path("login.jsp"))
 	if err != nil {
 		return err
 	}
@@ -71,18 +62,15 @@ func (c *Client) Login(user, pass string) error {
 	if err := checkStatus(resp); err != nil {
 		return err
 	}
-	c.token = c.csrf()
-	c.user = user
-	c.pass = pass
-	return c.LoginProcess()
+	return c.LoginProcess(user, pass)
 }
 
-func (c *Client) LoginProcess() error {
+func (c *Client) LoginProcess(user, pass string) error {
 	v := url.Values{}
-	v.Set("nick", c.user)
-	v.Set("passwd", c.pass)
-	v.Set("csrf", c.token)
-	resp, err := c.PostForm(c.loginProcess, v)
+	v.Set("nick", user)
+	v.Set("passwd", pass)
+	v.Set("csrf", c.csrf())
+	resp, err := c.PostForm(c.path("login_process"), v)
 	if err != nil {
 		return err
 	}
@@ -92,8 +80,8 @@ func (c *Client) LoginProcess() error {
 
 func (c *Client) Logout() error {
 	v := url.Values{}
-	v.Set("csrf", c.token)
-	resp, err := c.PostForm(c.logout, v)
+	v.Set("csrf", c.csrf())
+	resp, err := c.PostForm(c.path("logout"), v)
 	if err != nil {
 		return err
 	}
@@ -117,9 +105,9 @@ func (c *Client) BanIP(ip net.IP, v url.Values) error {
 	if ip == nil {
 		return fmt.Errorf("empty IP")
 	}
-	v.Set("csrf", c.token)
+	v.Set("csrf", c.csrf())
 	v.Set("ip", fmt.Sprint(ip))
-	resp, err := c.PostForm(c.banip, v)
+	resp, err := c.PostForm(c.path("banip.jsp"), v)
 	if err != nil {
 		return err
 	}

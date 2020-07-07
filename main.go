@@ -13,7 +13,7 @@ const defReason = "Anonymous TOR Coward"
 func main() {
 	var (
 		user, pass, reason, file, target string
-		worker, days, port               int
+		worker, days                     int
 		ban                              = Month
 	)
 
@@ -21,8 +21,7 @@ func main() {
 	flag.StringVar(&pass, "pass", os.Getenv("LORPASS"), "Password")
 	flag.StringVar(&reason, "reason", defReason, "Ban reason")
 	flag.StringVar(&file, "file", "", "IP list file")
-	flag.StringVar(&target, "target", "linux.org.ru", "Target host")
-	flag.IntVar(&port, "port", 443, "Target port")
+	flag.StringVar(&target, "target", "https://linux.org.ru", "Target host")
 	flag.IntVar(&worker, "worker", 2, "Concurrency")
 	flag.IntVar(&days, "days", 0, "Custom ban duration in days")
 	flag.Var(&ban, "ban", ban.Usage())
@@ -44,13 +43,13 @@ func main() {
 	if file != "" {
 		list, err = List(file)
 	} else {
-		list, err = Fetch(target, port)
+		list, err = Fetch(ExitList, target)
 	}
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	c, err := NewClient()
+	c, err := NewClient(target)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -59,15 +58,15 @@ func main() {
 	}
 	defer c.Logout()
 
+	bp := BanParams(reason, ban, days, true, false)
 	wg := sync.WaitGroup{}
 	for i := 0; i < worker; i++ {
 		wg.Add(1)
 		go func() {
 			defer wg.Done()
 			for ip := range list {
-				v := BanParams(reason, ban, days, true, false)
 				log.Println(ip, ban)
-				if err := c.BanIP(ip, v); err != nil {
+				if err := c.BanIP(ip, bp); err != nil {
 					log.Println(ip, err)
 					list <- ip // push back
 					return

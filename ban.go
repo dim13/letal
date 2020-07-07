@@ -1,8 +1,10 @@
 package main
 
-import "fmt"
+import "errors"
 
 type Ban string
+
+var ErrBanValue = errors.New("unknown ban value")
 
 const (
 	Hour       Ban = "hour"
@@ -20,7 +22,7 @@ var validBans = []Ban{Hour, Day, ThreeMonth, SixMonth, Unlim, Remove, Custom}
 func (b Ban) Usage() string {
 	s := "Ban duration:"
 	for _, v := range validBans {
-		s += fmt.Sprintf(" %v", v)
+		s += " " + string(v)
 	}
 	return s
 }
@@ -32,7 +34,7 @@ func (b *Ban) Set(s string) error {
 			return nil
 		}
 	}
-	return fmt.Errorf("unknown ban value")
+	return ErrBanValue
 }
 
 func (b Ban) String() string {
